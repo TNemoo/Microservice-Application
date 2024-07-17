@@ -1,6 +1,10 @@
 server:
   port: 8001
 
+logging:
+  level:
+    by.javaguru.client.CourseServiceFeignClient: DEBUG
+
 eureka:
   client:
     service-url:
@@ -30,25 +34,21 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         show_sql: true
 
-logging:
-  level:
-    by.javaguru.client.CourseServiceFeignClient: DEBUG
-
 management:
   endpoints:
     web:
       exposure:
-        include: mapping, bus-refresh, bus-env, health, circuit-breaker, events, retry
+        include: mapping,bus-refresh,bus-env,health,circuit-breaker-events,retry
   endpoint:
     health:
       enabled: true
       show-details: always
   health:
-    circuitbreakers:
+    circuit-breakers:
       enabled: true
 
 resilience4j:
-  circuitbreakers:
+  circuit-breaker:
     instances:
       phone-code-service:
         failureRateThreshold: 50
@@ -60,8 +60,11 @@ resilience4j:
         eventConsumerBufferSize: 10
         registerHealthIndicator: true
         permittedNumberOfCallsInHalfOpenState: 3
-        recordExceptions:
-          - feign.RetryableException
 
-
-
+    circuit-breaker-aspect-order: 1
+  retry:
+    retry-aspect-order: 2
+    instances:
+      phone-code-service:
+        maxAttempts: 5
+        waitDuration: 5000

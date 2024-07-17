@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: CONTACT-SERVICE
+
+  cloud:
+    config:
+#      uri: http://CONFIG-SERVER-SERVICE  # адрес Config Server
+      uri: http://localhost:8004  # адрес Config Server
+      fail-fast: true #если МС не подключилось к config-server оно не будет стартовать
+  config:
+    import:
+      optional:
+        configserver:
+
+config-name: K

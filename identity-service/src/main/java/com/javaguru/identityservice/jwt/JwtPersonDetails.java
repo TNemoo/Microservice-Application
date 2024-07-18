@@ -1,4 +1,4 @@
-package com.javaguru.identityservice.security;
+package com.javaguru.identityservice.jwt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.RequiredArgsConstructor;
@@ -7,28 +7,35 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
+/* Этот класс сущностей создается для:
+- удовлетворения требований SS относительно поля authorities
+- получения стандартных методов, относящихся к аккаунтам
+- оптимизации размера передаваемой сущности
+ */
+
 @RequiredArgsConstructor
-public class JwtPerson implements UserDetails {
+public class JwtPersonDetails implements UserDetails {
     private final String nickname;
     private final String password;
+    // SS требует, что бы список ролей был преобразован в контейнер из наследников GrantedAuthority
     private final Collection<? extends GrantedAuthority> authorities;
 
     @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return true; //TODO: DB
     }
 
     @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return true;//TODO: DB
     }
 
     @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return true;//TODO: DB
     }
 
     @JsonIgnore
@@ -49,6 +56,6 @@ public class JwtPerson implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return true;//TODO: DB
     }
 }

@@ -1,5 +1,8 @@
-package com.javaguru.identityservice.security;
+package com.javaguru.identityservice.jwt;
 
+
+//TODO:2
+/** Класс-обертка для токена. Пока не используется */
 public class JwtResponse {
     private String token;
 

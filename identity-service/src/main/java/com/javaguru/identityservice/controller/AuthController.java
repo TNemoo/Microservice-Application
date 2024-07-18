@@ -1,9 +1,9 @@
 package com.javaguru.identityservice.controller;
 
+import com.javaguru.identityservice.dto.AuthReqPersonDto;
 import com.javaguru.identityservice.dto.PersonDto;
 import com.javaguru.identityservice.service.AuthService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +23,11 @@ public class AuthController {
         return response;
     }
 
+
     /** Аутентификация - вход пользователя в систему по логин/пароль. Безопасность, см. выше */
     @PostMapping("/authentication")
-    public ResponseEntity<?> authentication (@RequestBody @Valid PersonDto personDto) {
-        ResponseEntity<?> response = authService.authentication(personDto);
+    public ResponseEntity<?> authentication (@RequestBody @Valid AuthReqPersonDto requestDto) {
+        ResponseEntity<?> response = authService.authentication(requestDto);
         return response;
     }
 

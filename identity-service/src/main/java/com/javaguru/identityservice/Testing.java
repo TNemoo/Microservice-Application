@@ -1,6 +1,7 @@
 package com.javaguru.identityservice;
 
-import com.javaguru.identityservice.security.AuthenticationPersonDto;
+import com.javaguru.identityservice.dto.AuthResPersonDto;
+import com.javaguru.identityservice.dto.PersonDto;
 import com.javaguru.identityservice.service.Role;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -14,19 +15,19 @@ import java.util.*;
 public class Testing {
     public static void main(String[] args) {
         Map<String, Object> claims = new HashMap<>();
-        AuthenticationPersonDto authPersonDto = new AuthenticationPersonDto("John", Collections.singleton(Role.ROLE_USER));
-        createToken(claims, authPersonDto);
+        AuthResPersonDto resPersonDto = new AuthResPersonDto("John", Collections.singleton(Role.ROLE_USER));
+        createToken(claims, resPersonDto);
     }
 
-    public static String createToken(Map<String, Object> claims, AuthenticationPersonDto authPersonDto) {
+    public static String createToken(Map<String, Object> claims, AuthResPersonDto authResPersonDto) {
         // Создаем список из String из списка enum Roles и помещаем его в тело:
-        List<String> rolesS = authPersonDto.roles().stream().map(v -> v.name()).toList();
+        List<String> rolesS = authResPersonDto.getRoles().stream().map(Enum::name).toList();
         claims.put("roles", rolesS);
 
         String jws = Jwts.builder()
                 .setClaims(claims) // claims - это Map<String, Object>, куда можно добавить любые данные
                 //.claim("email", email) // можно например добавить почтовый адрес как дополнительное поле
-                .setSubject(authPersonDto.nickname()) // устанавливаем никнейм как subject (sub) токена
+                .setSubject(authResPersonDto.getNickname()) // устанавливаем никнейм как subject (sub) токена
                 .setIssuedAt(new Date()) // Время выпуска токена
                 .setExpiration(new Date(System.currentTimeMillis() + 36000000)) // Время истечения токена (10 час)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Подпись токена

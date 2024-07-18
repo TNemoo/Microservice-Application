@@ -1,5 +1,6 @@
-package com.javaguru.identityservice.security;
+package com.javaguru.identityservice.jwt;
 
+import com.javaguru.identityservice.service.AuthService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -12,18 +13,20 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
-public class SS_JwtTokenFilter extends GenericFilterBean {
 
-    private final JwtService jwtService;
+@RequiredArgsConstructor
+public class JwtTokenFilter extends GenericFilterBean {
+
+    private final AuthService authService;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
             throws IOException, ServletException {
 
-        String token = jwtService.cutTokenOut((HttpServletRequest) req);
-        if (token != null && jwtService.validateToken(token)) {
-            Authentication auth = jwtService.getAuthentication(token);
+        String token = authService.cutTokenOut((HttpServletRequest) req);
+
+        if (token != null && authService.validateToken(token)) {
+            Authentication auth = authService.getAuthentication(token);
 
             if (auth != null) {
                 SecurityContextHolder.getContext().setAuthentication(auth);

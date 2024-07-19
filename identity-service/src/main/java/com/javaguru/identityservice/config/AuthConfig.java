@@ -55,6 +55,11 @@ public class AuthConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+}
+
+/* Нельзя создавать бин и навешивать @Component или аннотации содержащие @Component одновременно!
+    Будет 2 бина, а т.к. все бины AuthenticationProvider используется Spring Security автоматически, будет вызван
+    каждый из них, что создаст циклическую зависимость.
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -63,6 +68,4 @@ public class AuthConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
-
-
-}
+*/

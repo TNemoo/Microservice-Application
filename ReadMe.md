@@ -18,7 +18,29 @@
 
 ### FUNCTIONALITY/FEATURES:
 * Токен упрощенно можно получить запустив класс src/main/java/com/javaguru/gateway/util/Token.java
+* Так же токен можно получить при регистрации юзера, см. далее.
+
 * Запросы:
+  * Регистрация нового юзера. Создание сущности в таблице h2 МС Identity Service:
+    * POST http://localhost:8080/auth/register
+      {
+      "id": "0",
+      "nickname": "SantaClaus2",
+      "firstname": "John",
+      "surname": "Constantine",
+      "email": "ya@gmail2.com",
+      "password": "1234"
+      }
+      id в dto используется для возможности добавления метода контроллера с заменой данных юзера, если
+      id будет не эквивалентно нулю.
+  
+  * Получение токена, nickname и roles в ответ на логин/пароль
+    * POST http://localhost:8080/auth/authentication
+      {
+      "nickname": "SantaClaus",
+      "password": "1234"
+      }
+
   * Создание сущности в таблице h2 МС Phone Code Service:
     * POST http://localhost:8080/codes
     {
@@ -26,6 +48,7 @@
     "code": "12",
     "countryId": 45
     }
+  
   * Получение id сущности из таблицы h2 МС Phone Code Service по code:
     * GET http://localhost:8080/codes/1
   * Получение code сущности из таблицы h2 МС Phone Code Service по id:
@@ -39,6 +62,7 @@
     "phoneNumber": "23-456-446-85-85",
     "email": "ya@gmail.com"
     }
+    
   * Получение сущности из таблицы h2 Contact Service по id: 
     * GET http://localhost:8080/contacts?cvsId=1
 
@@ -52,7 +76,7 @@
   * application.yml или application.properties, лежащего в корневой директории на УР
   * GET http://localhost:8004/properties/get
 
- 
+
 
 ### Additional info
 

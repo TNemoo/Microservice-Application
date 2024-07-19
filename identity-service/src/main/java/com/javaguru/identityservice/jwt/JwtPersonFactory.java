@@ -8,6 +8,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/* Класс JwtPersonFactory предназначен для создания объекта JwtPersonDetails на основе объекта Person.
+JwtPersonDetails содержит информацию о пользователе, которая будет использоваться в процессе аутентификации и
+авторизации в Spring Security. Основная цель этого класса — преобразование сущности Person в объект, пригодный для
+использования Spring Security. */
 @NoArgsConstructor
 public final class JwtPersonFactory {
 

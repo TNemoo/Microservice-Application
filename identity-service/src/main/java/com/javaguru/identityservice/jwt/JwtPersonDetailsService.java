@@ -18,7 +18,6 @@ UserDetailsService — это интерфейс Spring Security, предназ
 для SS класса UserDetails, из сущности Person, полученной из БД только по уникальному идентификатору. Проверка пароля
 осуществляется в методе класса Authentication, вызывающем этот метод.
  */
-//TODO: ok
 
 @Slf4j
 @Service

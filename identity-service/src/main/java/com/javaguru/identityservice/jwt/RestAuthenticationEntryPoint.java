@@ -13,13 +13,10 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Collections;
 
-//TODO: OK
-
-//метод commence интерфейса AuthenticationEntryPoint вызывается при попытке не аутентифицированного доступа к
-// защищенному ресурсу
+/* метод commence интерфейса AuthenticationEntryPoint вызывается при попытке не аутентифицированного доступа к
+защищенному ресурсу */
 @Component
 public final class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception)

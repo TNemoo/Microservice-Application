@@ -18,11 +18,9 @@ UserDetailsService — это интерфейс Spring Security, предназ
  */
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class JwtPersonDetailsService implements UserDetailsService {
 
-    private final PersonRepository personRepository;
     private final AuthService authService;
 
     @Override

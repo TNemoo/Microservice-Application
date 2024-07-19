@@ -36,7 +36,7 @@ public class SecurityConfig {
                     // разрешает доступ к любому запросу типа OPTIONS без аутентификации:
                     .requestMatchers(HttpMethod.OPTIONS).permitAll()
                     // эти URL доступны для всех:
-                    .requestMatchers("/auth/register", "/authentication").permitAll()
+                    .requestMatchers("/auth/register", "/auth/authentication").permitAll()
                     //только аутентифицированные пользователи с ролью ADMIN смогут получить доступ к этому URL:
                     .requestMatchers("/admin").hasRole("ADMIN")
                     // все URL, начинающиеся с /contacts/. Для этих URL требуется, чтобы пользователи имели хотя

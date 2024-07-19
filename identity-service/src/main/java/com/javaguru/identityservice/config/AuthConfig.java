@@ -2,6 +2,8 @@ package com.javaguru.identityservice.config;
 
 import com.javaguru.identityservice.jwt.JwtPersonDetailsService;
 import com.javaguru.identityservice.jwt.JwtTokenFilter;
+import com.javaguru.identityservice.jwt.JwtTokenProvider;
+import com.javaguru.identityservice.repository.PersonRepository;
 import com.javaguru.identityservice.service.AuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties;
@@ -26,18 +28,19 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class AuthConfig {
 
-    private final AuthService authService;
+    private final PersonRepository personRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new JwtPersonDetailsService(authService);
+        return new JwtPersonDetailsService(personRepository);
     }
 
     //     Бин кастомного фильтра для токенов
     @Bean
     public JwtTokenFilter jwtTokenFilter() {
-        return new JwtTokenFilter(authService);
+        return new JwtTokenFilter(jwtTokenProvider);
     }
 
 
@@ -53,7 +56,6 @@ public class AuthConfig {
         return new BCryptPasswordEncoder();
     }
 
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -61,4 +63,6 @@ public class AuthConfig {
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }
+
+
 }

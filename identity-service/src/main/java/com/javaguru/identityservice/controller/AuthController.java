@@ -1,6 +1,7 @@
 package com.javaguru.identityservice.controller;
 
 import com.javaguru.identityservice.dto.AuthReqPersonDto;
+import com.javaguru.identityservice.dto.AuthResPersonDto;
 import com.javaguru.identityservice.dto.PersonDto;
 import com.javaguru.identityservice.service.AuthService;
 import jakarta.validation.Valid;
@@ -19,7 +20,7 @@ public class AuthController {
      * получения/создания и подключения в yml SSL сертификата */
     @PostMapping("/register")
     public ResponseEntity<?> registration (@RequestBody @Valid PersonDto personDto) {
-        ResponseEntity<PersonDto> response = authService.save(personDto);
+        ResponseEntity<AuthResPersonDto> response = authService.save(personDto);
         return response;
     }
 

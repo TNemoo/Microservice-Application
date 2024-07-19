@@ -1,6 +1,7 @@
 package com.javaguru.identityservice.service;
 
 import com.javaguru.identityservice.dto.AuthReqPersonDto;
+import com.javaguru.identityservice.dto.AuthResPersonDto;
 import com.javaguru.identityservice.dto.PersonDto;
 import com.javaguru.identityservice.entity.Person;
 import com.javaguru.identityservice.exception.AlreadyExistException;
@@ -43,20 +44,19 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-
+    /** Дублирование с JwtTokenProvider */
     // секретное слово для токена, находится в yml
     @Value("${spring.security.jwt.secret}")
     private String secret;
 
+    /** Дублирование с JwtTokenProvider */
     // время жизни токена, находится в yml (3600000 = 1 час, 36000000 = 10 часов)
     @Value("${spring.security.jwt.expired}0")
     private long validityInMilliseconds;
 
 
-
-
-    /** Регистрация нового пользователя */
-    public ResponseEntity<PersonDto> save(PersonDto personDto) {
+    // Регистрация нового пользователя
+    public ResponseEntity<AuthResPersonDto> save(PersonDto personDto) {
         Long id = personDto.getId();
 
         if (id != 0)
@@ -105,13 +105,13 @@ public class AuthService {
 
     /* После проверки данных юзера, к nickname + roles в этом методе генерируем токен на основе nickname юзера
     и секретного слова в нашем приложении: */
-    private ResponseEntity<PersonDto> getPersonDtoResponseEntity(AuthReqPersonDto requestDto) {
+    private ResponseEntity<AuthResPersonDto> getPersonDtoResponseEntity(AuthReqPersonDto authReqPersonDto) {
 
-        Person person = findByNickname(requestDto.getNickname());
+        Person person = findByNickname(authReqPersonDto.getNickname());
 
-        PersonDto personDto = modelMapper.map(person, PersonDto.class);
+        AuthResPersonDto authResPersonDto = modelMapper.map(person, AuthResPersonDto.class);
 
-        final String token = generateToken(personDto);
+        final String token = generateToken(authResPersonDto);
 
         /** Создаем headers для ResponseEntity */
         HttpHeaders headers = new HttpHeaders();
@@ -122,7 +122,7 @@ public class AuthService {
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(personDto);
+                .body(authResPersonDto);
     }
 
 
@@ -132,88 +132,22 @@ public class AuthService {
     }
 
 
-    private Key getSigningKey() {
-        byte[] keyByte = Decoders.BASE64.decode(secret);
-        // декодирует строку secret из BASE64 в массив байт
-        return Keys.hmacShaKeyFor(keyByte);
-        // создает секретный ключ типа Key из массива байт keyByte с использованием алгоритма HMAC-SHA.
-    }
-
-
-    // Применяется в SS_JwtTokenFilter
-    public boolean validateToken(String token) {
-        try {
-            // Парсинг и проверка JWT токена с использованием секретного ключа
-            Jws<Claims> claims = Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
-
-            // Проверка, не истек ли срок действия токена
-            if (claims.getBody().getExpiration().before(new Date())) {
-                log.info("IN validateToken - JWT token has expired");
-                return false;  // Токен истек
-            }
-
-            log.info("IN validateToken - JWT token valid");
-            return true;  // Токен действителен
-
-        } catch (JwtException | IllegalArgumentException e) {
-            log.info("IN validateToken - expired or invalid JWT token");
-            return false;  // Токен недействителен или некорректен
-        }
-    }
-
-
-    // Метод возвращает информацию о пользователе, его шифрованный пароль, активен ли пользователь и его роли
-    public Authentication getAuthentication(String token) {
-        // Используя секретное слово вычисляем nickname юзера: */
-        String nickname = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
-        // Внимательно! Здесь parseClaimsJws, а не parseClaimsJwt. Метод parseClaimsJwt предназначен для анализа
-        // несекретных токенов, а parseClaimsJws - для анализа JWT токенов с подписью
-
-        // Находим в БД данные юзера
-        Optional<Person> personOpt = personRepository.findByNickname(nickname);
-        Person person = personOpt.orElseThrow(() -> {
-            throw new NotFoundException(String.format("The nickname '%s' is not exist", nickname));
-        });
-
-        // Трансфер в стандартный SS entity класс UserDetails
-        UserDetails userDetails = modelMapper.map(person, UserDetails.class);
-
-        // Возвращаем стандартный для SS объект, собранный из UserDetails. Объект UsernamePasswordAuthenticationToken
-        // является реализацией интерфейса Authentication в Spring Security. Этот объект представляет собой
-        // токен аутентификации, который содержит информацию о пользователе и его правах доступа. */
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-        // - principal (первый аргумент): Это объект, представляющий идентифицированного пользователя.
-        // В большинстве случаев это объект UserDetails, который содержит информацию о пользователе, такую как
-        // имя пользователя, пароль, активен ли пользователь и его роли.
-        //  - credentials (второй аргумент): Это объект, представляющий учетные данные пользователя.
-        // Обычно это пароль пользователя. Однако, после успешной аутентификации пароль может быть опущен (например,
-        // установлен в пустую строку ""), так как он больше не нужен.
-        // - authorities (третий аргумент): Это коллекция, представляющая роли или права доступа пользователя.
-        // Она также может быть (!) получена из объекта UserDetails, а может передаваться из другого места. */
-    }
-
-
-
-    public String generateToken(PersonDto personDto) {
+    public String generateToken(AuthResPersonDto authResPersonDto) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, personDto);
+        return createToken(claims, authResPersonDto);
     }
 
-
-
-    public String createToken(Map<String, Object> claims, PersonDto personDto) {
+    /** Дублирование с JwtTokenProvider */
+    public String createToken(Map<String, Object> claims, AuthResPersonDto authResPersonDto) {
         // Создаем список из String из списка enum Roles и помещаем его в тело:
-        List<String> rolesS = personDto.getRoles().stream().map(Enum::name).toList();
+        List<String> rolesS = authResPersonDto.getRoles().stream().map(Enum::name).toList();
 
         claims.put("roles", rolesS);
 
         String jws = Jwts.builder()
                 .setClaims(claims) // claims - это Map<String, Object>, куда можно добавить любые данные
                 //.claim("email", email) // можно например добавить почтовый адрес как дополнительное поле
-                .setSubject(personDto.getNickname()) // устанавливаем никнейм как subject (sub) токена
+                .setSubject(authResPersonDto.getNickname()) // устанавливаем никнейм как subject (sub) токена
                 .setIssuedAt(new Date()) // Время выпуска токена
                 .setExpiration(new Date(System.currentTimeMillis() + validityInMilliseconds)) // Время истечения токена (10 час)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Подпись токена
@@ -222,22 +156,12 @@ public class AuthService {
         return jws;
     }
 
-
-    // Возвращает вырезанный из строки в хэдере токен
-    public String cutTokenOut(HttpServletRequest req) {
-        String bearerToken = req.getHeader(HttpHeaders.AUTHORIZATION);
-        return bearerToken != null && bearerToken.startsWith("Bearer") ? bearerToken.substring(6) : null;
-    }
-
-
-
-    // Создает сущность JwtPerson на основе сущности Person
-    public static JwtPersonDetails create(Person person) {
-        List<GrantedAuthority> grantedAuthorities = person.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.name())).collect(Collectors.toList());
-        // SS требует, что бы список ролей был преобразован в контейнер из наследников GrantedAuthority
-
-        return new JwtPersonDetails(person.getNickname(), person.getPassword(), grantedAuthorities);
+    /** Дублирование с JwtTokenProvider */
+    private Key getSigningKey() {
+        byte[] keyByte = Decoders.BASE64.decode(secret);
+        // декодирует строку secret из BASE64 в массив байт
+        return Keys.hmacShaKeyFor(keyByte);
+        // создает секретный ключ типа Key из массива байт keyByte с использованием алгоритма HMAC-SHA.
     }
 }
 
